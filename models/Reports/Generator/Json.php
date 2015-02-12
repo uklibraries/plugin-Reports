@@ -49,37 +49,29 @@ class Reports_Generator_Json
     /**
      * Generates the JSON document for the report.
      */
-    private function outputJSON() { 
-        $reportName = $this->_report->name;
-        $reportDescription = $this->_report->description;
-        ?>
-
-        <?php echo date('Y-m-d H:i:s O') ?>
-<?php $page = 1;
-    while ($items = get_db()->getTable('Item')->findBy($this->_params, 30, $page)):
-        foreach ($items as $item) : ?>
-            <?php echo $item->id; ?>
-
-<?php       $sets = get_db()->getTable('ElementSet')->findByRecordType('Item');
-            // Output all the metadata for all the element sets
-            foreach($sets as $set) :
-                $this->_outputSetElements($item, $set->name);
-            endforeach;
-            $tags = $item->getTags(); 
-            if (count($tags)): ?
-            <?php echo implode($tags, ', '); ?>
-<?php       endif; ?>
-
-<?php       release_object($item); 
-        endforeach;
-        $page++;
-    endwhile; ?>
-}
-<?php
+    private function outputJSON() {
+        $metadata = array();
+        $page = 1;
+        while ($items = get_db()->getTable('Item')->findBy($this->_params, 30, $page) {
+          foreach ($items as $item) {
+            $item_metadata = array();
+            $sets = get_db()->getTable('ElementSet')->findByRecordType('Item');
+            foreach ($sets as $set) {
+                $item_metadata = array_merge(
+                    $item_metadata,
+                    $this->_getSetElements($item, $set->name)m
+                );
+            }
+            $metadata[] = $item_metadata;
+            release_object($item);
+          }
+          $page++;
+        }
+        print json_encode($metadata);
     }
-    
+
     /**
-     * Prints JSON for the elements from the given item in the given element set
+     * Returns the elements from the given item in the given element set
      * and optionally specific element names.
      * If no element names are specified, all the elements in the set will be
      * output.
@@ -89,37 +81,19 @@ class Reports_Generator_Json
      * @param array $elementNames Array of element names to be output
      */
 
-private function outputJSON()
-{
-    $metadata = array(
-        /* fields like name, description, and date go here */
-        'name' => $this->_report->name;
-    );
-
-    $page = 1;
-    while ($items = get_db()->getTable('Item')->findBy(/* blah */)) {
-        foreach ($items as $item) {
-            $item_metadata = array(
-                'id'   => $item->id,
-                'sets' => array(),
-                'tags' => $item->getTags(),
-            );
-
-            /* fill out sets metadata */
-            $sets = get_db()->getTable('ElementSet')->findByRecordType('Item');
-            foreach ($sets as $set) {
-                /* _outputSetElements should return an array,
-                 * not print anything.  Consider renaming it. */
-                $item_metadata['sets'][] = $this->_outputSetElements($item, $set->name);
-            }
-            release_object($item);
+    private function _getSetElements($item, $setName, $elementNames = null) {
+        if (!isset($elementNames) or !is_array($elementNames)) {
+            $elementNames = $item->getElementsBySetName($setName);
         }
-        $page++;
+        $metadata = array();
+        foreach ($elementNames as $elementName) {
+            $texts = $item->getElementTexts($setName, $elementName);
+            foreach ($texts as $text) {
+                $metadata[$elementName] = $text->text;
+            }
+        }
+        return $metadata;
     }
-
-    print json_encode($metadata);
-}
-
 
     /**
      * Returns the readable name of this output format.
@@ -136,7 +110,7 @@ private function outputJSON()
      * @return string HTTP Content-type
      */
     public function getContentType() {
-        return 'text/json';
+        return 'application/json';
     }
     
     /**

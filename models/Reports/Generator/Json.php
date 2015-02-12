@@ -83,7 +83,10 @@ class Reports_Generator_Json
 
     private function _getSetElements($item, $setName, $elementNames = null) {
         if (!isset($elementNames) or !is_array($elementNames)) {
-            $elementNames = $item->getElementsBySetName($setName);
+            $elementNames = array();
+            foreach ($item->getElementsBySetName($setName) as $element) {
+                $elementNames[] = $element->name;
+            }
         }
         $metadata = array();
         foreach ($elementNames as $elementName) {

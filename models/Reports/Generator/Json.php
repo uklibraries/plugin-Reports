@@ -112,20 +112,26 @@ class Reports_Generator_Json
         
         if (count($outputTexts)) {
             echo "$setName";
-            echo '{';
             foreach($outputTexts as $outputText) {
-                echo '"'
-                   . $outputText['element']
-                   . '":'
-                   . '"'
-                   . $outputText['text']
-                   . '",';
+            $metadata = array('name' => 'element', 'text' => array());
+            $element_data = array(
+        array(
+           'element' => '$outputText['element']',
+           'text' => $outputText['text'],
+    ),
+);
+
+        foreach ($element_data as $element) {
+        $metadata['elements'][] = $element;
+}
+
+   print json_encode($metadata);
             }
-            echo '}';
         }
     }
     
-    
+
+
     /**
      * Returns the readable name of this output format.
      *

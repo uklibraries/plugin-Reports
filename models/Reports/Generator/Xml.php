@@ -112,19 +112,11 @@ class Reports_Generator_Xml
         }
         
         if (count($outputTexts)) {
-            echo "<h3>$setName</h3>";
-            echo '<table class="element-texts" cellpadding="0" cellspacing="0">';
             foreach($outputTexts as $outputText) {
-                echo '<tr class="element">'
-                   . '<th scope="row" class="element-name">'
-                   . $outputText['element']
-                   . '</th>'
-                   . '<td class="element-value">'
+                echo <$outputText['element']>'
                    . $outputText['text']
-                   . '</td>'
-                   . '</tr>';
+                   . '</$outputText['element']>';
             }
-            echo '</table>';
         }
     }
     

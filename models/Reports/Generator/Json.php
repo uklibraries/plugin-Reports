@@ -88,48 +88,37 @@ class Reports_Generator_Json
      * @param string $setName The name of the set to output metadata for
      * @param array $elementNames Array of element names to be output
      */
-    private function _outputSetElements($item, $setName, $elementNames = null)
-    {
-        $outputTexts = array();
-        
-        if (!$elementNames) {
-            $elements = $item->getElementsBySetName($setName);
-            foreach ($elements as $element) {
-                foreach ($item->getElementTexts($setName, $element->name) as $text) {
-                    $outputTexts[] = array('element' => $element->name,
-                                           'text'    => $text->text);
-                }
-            }
-        } else if (is_array($elementNames)) {
-            foreach ($elementNames as $elementName) {
-                $texts = $item->getElementTexts($setName, $elementName);
-                foreach ($texts as $text) {
-                    $outputTexts[] = array('element' => $elementName,
-                                           'text'    => $text->text);
-                }
-            }
-        }
-        
-        if (count($outputTexts)) {
-            echo "$setName";
-            foreach($outputTexts as $outputText) {
-            $metadata = array('name' => 'element', 'text' => array());
-            $element_data = array(
-        array(
-           'element' => '$outputText['element']',
-           'text' => $outputText['text'],
-    ),
-);
 
-        foreach ($element_data as $element) {
-        $metadata['elements'][] = $element;
-}
+private function outputJSON()
+{
+    $metadata = array(
+        /* fields like name, description, and date go here */
+        'name' => $this->_report->name;
+    );
 
-   print json_encode($metadata);
+    $page = 1;
+    while ($items = get_db()->getTable('Item')->findBy(/* blah */)) {
+        foreach ($items as $item) {
+            $item_metadata = array(
+                'id'   => $item->id,
+                'sets' => array(),
+                'tags' => $item->getTags(),
+            );
+
+            /* fill out sets metadata */
+            $sets = get_db()->getTable('ElementSet')->findByRecordType('Item');
+            foreach ($sets as $set) {
+                /* _outputSetElements should return an array,
+                 * not print anything.  Consider renaming it. */
+                $item_metadata['sets'][] = $this->_outputSetElements($item, $set->name);
             }
+            release_object($item);
         }
+        $page++;
     }
-    
+
+    print json_encode($metadata);
+}
 
 
     /**

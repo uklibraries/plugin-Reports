@@ -52,14 +52,14 @@ class Reports_Generator_Json
     private function outputJSON() {
         $metadata = array();
         $page = 1;
-        while ($items = get_db()->getTable('Item')->findBy($this->_params, 30, $page) {
+        while ($items = get_db()->getTable('Item')->findBy($this->_params, 30, $page)) {
           foreach ($items as $item) {
             $item_metadata = array();
             $sets = get_db()->getTable('ElementSet')->findByRecordType('Item');
             foreach ($sets as $set) {
                 $item_metadata = array_merge(
                     $item_metadata,
-                    $this->_getSetElements($item, $set->name)m
+                    $this->_getSetElements($item, $set->name)
                 );
             }
             $metadata[] = $item_metadata;

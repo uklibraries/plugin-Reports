@@ -54,13 +54,11 @@ class Reports_Generator_Json
         $reportDescription = $this->_report->description;
         ?>
 
-<!--<?php echo $reportName; ?>-->
         <?php echo date('Y-m-d H:i:s O') ?>
-        <!--<?php echo $reportDescription; ?>-->
 <?php $page = 1;
     while ($items = get_db()->getTable('Item')->findBy($this->_params, 30, $page)):
         foreach ($items as $item) : ?>
-            <!--<?php echo $item->id; ?>-->
+            <?php echo $item->id; ?>
 
 <?php       $sets = get_db()->getTable('ElementSet')->findByRecordType('Item');
             // Output all the metadata for all the element sets
